@@ -1,8 +1,5 @@
 # 🤖 MediaPipe Hand Landmarker
 
-> **Deteksi landmark tangan real-time profesional menggunakan AI MediaPipe Google**  
-> **Professional real-time hand landmark detection using Google's MediaPipe AI**
-
 [![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://python.org)
 [![MediaPipe](https://img.shields.io/badge/MediaPipe-Latest-green.svg)](https://mediapipe.dev)
 [![OpenCV](https://img.shields.io/badge/OpenCV-4.0+-red.svg)](https://opencv.org)
@@ -10,13 +7,30 @@
 
 ---
 
-## 🌐 Language / Bahasa
-- [🇮🇩 Bahasa Indonesia](#bahasa-indonesia)
-- [🇺🇸 English](#english)
+## 🌐 Choose Your Language / Pilih Bahasa Anda
+
+<div align="center">
+  <table>
+    <tr>
+      <td align="center">
+        <a href="#-bahasa-indonesia">
+          <img src="https://img.shields.io/badge/🇮🇩-Bahasa_Indonesia-red?style=for-the-badge" alt="Bahasa Indonesia">
+        </a>
+      </td>
+      <td align="center">
+        <a href="#-english">
+          <img src="https://img.shields.io/badge/🇺🇸-English-blue?style=for-the-badge" alt="English">
+        </a>
+      </td>
+    </tr>
+  </table>
+</div>
 
 ---
 
 # 🇮🇩 Bahasa Indonesia
+
+> **Sistem deteksi landmark tangan real-time profesional menggunakan AI MediaPipe Google**
 
 ## 📋 Saran Nama Repository
 
@@ -203,6 +217,8 @@ Proyek ini dilisensikan di bawah MIT License - lihat file [LICENSE](LICENSE) unt
 ---
 
 # 🇺🇸 English
+
+> **Professional real-time hand landmark detection system using Google's MediaPipe AI**
 
 ## 📋 Repository Suggestions
 
