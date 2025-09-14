@@ -1,0 +1,16 @@
+# MediaPipe Hand Landmarker Dependencies
+# Core AI and Computer Vision
+mediapipe>=0.10.0
+opencv-python>=4.8.0
+numpy>=1.21.0
+
+# Optional: Development and Testing
+# pytest>=7.0.0
+# black>=22.0.0
+# flake8>=5.0.0
+# mypy>=1.0.0
+
+# Optional: Enhanced Features
+# matplotlib>=3.5.0  # For advanced plotting
+# pillow>=9.0.0      # For image processing
+# scipy>=1.8.0       # For scientific computing
