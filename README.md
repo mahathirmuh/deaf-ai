@@ -209,7 +209,7 @@ Proyek ini dilisensikan di bawah MIT License - lihat file [LICENSE](LICENSE) unt
 
 ## 📞 Dukungan
 
-- 📧 **Email**: support@yourproject.com
+- 📧 **Email**: mahathirmuhammad02@gmail.com
 - 🐛 **Issues**: [GitHub Issues](https://github.com/yourusername/mediapipe-hand-landmarker/issues)
 - 💬 **Diskusi**: [GitHub Discussions](https://github.com/yourusername/mediapipe-hand-landmarker/discussions)
 - 📖 **Dokumentasi**: [Wiki](https://github.com/yourusername/mediapipe-hand-landmarker/wiki)
@@ -443,7 +443,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-- 📧 **Email**: support@yourproject.com
+- 📧 **Email**: mahathirmuhammad02@gmail.com
 - 🐛 **Issues**: [GitHub Issues](https://github.com/yourusername/mediapipe-hand-landmarker/issues)
 - 💬 **Discussions**: [GitHub Discussions](https://github.com/yourusername/mediapipe-hand-landmarker/discussions)
 - 📖 **Documentation**: [Wiki](https://github.com/yourusername/mediapipe-hand-landmarker/wiki)
