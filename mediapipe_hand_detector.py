@@ -27,29 +27,29 @@ class MediaPipeHandDetector:
         self.mp_drawing = mp.solutions.drawing_utils
         self.mp_drawing_styles = mp.solutions.drawing_styles
         
-        # Performance tracking
+        # Pelacakan performa
         self.fps_counter = 0
         self.fps_start_time = time.time()
         self.current_fps = 0
         
-        # Application state
+        # Status aplikasi
         self.paused = False
         self.show_landmarks = True
         self.show_connections = True
         
-        # MediaPipe configuration
+        # Konfigurasi MediaPipe
         self.BaseOptions = mp.tasks.BaseOptions
         self.HandLandmarker = mp.tasks.vision.HandLandmarker
         self.HandLandmarkerOptions = mp.tasks.vision.HandLandmarkerOptions
         self.HandLandmarkerResult = mp.tasks.vision.HandLandmarkerResult
         self.VisionRunningMode = mp.tasks.vision.RunningMode
         
-        # Initialize landmarker (will be set up in setup_landmarker)
+        # Inisialisasi landmarker (akan diatur dalam setup_landmarker)
         self.landmarker = None
         self.latest_result = None
         self.result_timestamp = 0
         
-        # Image dimensions and projection matrix for efficient processing
+        # Dimensi gambar dan matriks proyeksi untuk pemrosesan efisien
         self.image_width = 640
         self.image_height = 480
         self.projection_matrix = np.array([
@@ -199,28 +199,28 @@ class MediaPipeHandDetector:
         height, width = frame.shape[:2]
         
         for hand_idx, hand_landmarks in enumerate(result.hand_landmarks):
-            # Convert landmarks to pixel coordinates using scaling factors
+            # Konversi landmark ke koordinat piksel menggunakan faktor skala
             landmark_points = []
             for landmark in hand_landmarks:
-                # Apply scaling factors to landmark coordinates
+                # Terapkan faktor skala ke koordinat landmark
                 x = int(landmark.x * 640 * self.scale_x)
                 y = int(landmark.y * 480 * self.scale_y)
                 landmark_points.append((x, y))
             
-            # Draw connections
+            # Gambar koneksi
             if self.show_connections:
                 connections = [
-                    # Thumb
+                    # Ibu jari
                     (0, 1), (1, 2), (2, 3), (3, 4),
-                    # Index finger
+                    # Jari telunjuk
                     (0, 5), (5, 6), (6, 7), (7, 8),
-                    # Middle finger
+                    # Jari tengah
                     (0, 9), (9, 10), (10, 11), (11, 12),
-                    # Ring finger
+                    # Jari manis
                     (0, 13), (13, 14), (14, 15), (15, 16),
-                    # Pinky
+                    # Jari kelingking
                     (0, 17), (17, 18), (18, 19), (19, 20),
-                    # Palm
+                    # Telapak tangan
                     (5, 9), (9, 13), (13, 17)
                 ]
                 
@@ -231,38 +231,38 @@ class MediaPipeHandDetector:
                         end_point = landmark_points[end_idx]
                         cv2.line(frame, start_point, end_point, (0, 255, 0), 2)
             
-            # Draw landmark points
+            # Gambar titik-titik landmark
             if self.show_landmarks:
                 for i, (x, y) in enumerate(landmark_points):
-                    # Different colors for different finger parts
-                    if i == 0:  # Wrist
-                        color = (255, 0, 0)  # Blue
-                    elif i in [1, 2, 3, 4]:  # Thumb
-                        color = (0, 255, 255)  # Yellow
-                    elif i in [5, 6, 7, 8]:  # Index
+                    # Warna berbeda untuk bagian jari yang berbeda
+                    if i == 0:  # Pergelangan tangan
+                        color = (255, 0, 0)  # Biru
+                    elif i in [1, 2, 3, 4]:  # Ibu jari
+                        color = (0, 255, 255)  # Kuning
+                    elif i in [5, 6, 7, 8]:  # Telunjuk
                         color = (255, 0, 255)  # Magenta
-                    elif i in [9, 10, 11, 12]:  # Middle
-                        color = (0, 255, 0)  # Green
-                    elif i in [13, 14, 15, 16]:  # Ring
+                    elif i in [9, 10, 11, 12]:  # Tengah
+                        color = (0, 255, 0)  # Hijau
+                    elif i in [13, 14, 15, 16]:  # Manis
                         color = (255, 255, 0)  # Cyan
-                    else:  # Pinky
-                        color = (128, 0, 128)  # Purple
+                    else:  # Kelingking
+                        color = (128, 0, 128)  # Ungu
                     
                     cv2.circle(frame, (x, y), 5, color, -1)
                     cv2.circle(frame, (x, y), 5, (255, 255, 255), 1)
                     
-                    # Draw landmark index
+                    # Gambar indeks landmark
                     cv2.putText(frame, str(i), (x + 8, y - 8), 
                               cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 255, 255), 1)
             
-            # Display hand information
+            # Tampilkan informasi tangan
             if result.handedness:
                 handedness = result.handedness[hand_idx]
                 if handedness:
                     hand_label = handedness[0].category_name
                     confidence = handedness[0].score
                     
-                    # Find wrist position for text placement
+                    # Temukan posisi pergelangan tangan untuk penempatan teks
                     wrist_x, wrist_y = landmark_points[0]
                     text = f"{hand_label} ({confidence:.2f})"
                     cv2.putText(frame, text, (wrist_x - 50, wrist_y - 20),
@@ -270,7 +270,7 @@ class MediaPipeHandDetector:
     
     def calculate_fps(self):
         """
-        Calculate and update FPS
+        Hitung dan perbarui FPS
         """
         self.fps_counter += 1
         current_time = time.time()
@@ -282,33 +282,33 @@ class MediaPipeHandDetector:
     
     def draw_info(self, frame):
         """
-        Draw information overlay on frame
+        Gambar overlay informasi pada frame
         
         Args:
-            frame: Frame to draw on
+            frame: Frame untuk digambar
         """
-        # FPS counter
+        # Penghitung FPS
         fps_text = f"FPS: {self.current_fps:.1f}"
         cv2.putText(frame, fps_text, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
         
-        # Hand count
+        # Jumlah tangan
         hand_count = len(self.latest_result.hand_landmarks) if self.latest_result and self.latest_result.hand_landmarks else 0
-        hand_text = f"Hands Detected: {hand_count}"
+        hand_text = f"Tangan Terdeteksi: {hand_count}"
         cv2.putText(frame, hand_text, (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
         
-        # MediaPipe status
+        # Status MediaPipe
         status_text = "MediaPipe Hand Landmarker"
         cv2.putText(frame, status_text, (10, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
         
-        # Pause indicator
+        # Indikator jeda
         if self.paused:
-            cv2.putText(frame, "PAUSED", (frame.shape[1] - 150, 30), 
+            cv2.putText(frame, "DIJEDA", (frame.shape[1] - 150, 30), 
                        cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
         
-        # Controls
+        # Kontrol
         controls = [
-            "SPACE: Pause | S: Save | C: Connections",
-            "L: Landmarks | Q/ESC: Quit"
+            "SPACE: Jeda | S: Simpan | C: Koneksi",
+            "L: Landmark | Q/ESC: Keluar"
         ]
         
         for i, control in enumerate(controls):
@@ -318,116 +318,116 @@ class MediaPipeHandDetector:
     
     def save_screenshot(self, frame):
         """
-        Save current frame as screenshot
+        Simpan frame saat ini sebagai tangkapan layar
         
         Args:
-            frame: Frame to save
+            frame: Frame untuk disimpan
         """
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"mediapipe_hand_detection_{timestamp}.jpg"
         
-        # Create output directory if it doesn't exist
+        # Buat direktori output jika belum ada
         output_dir = "hand_detection_output"
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
         
         filepath = os.path.join(output_dir, filename)
         cv2.imwrite(filepath, frame)
-        print(f"📸 Screenshot saved: {filepath}")
+        print(f"📸 Tangkapan layar disimpan: {filepath}")
     
     def cleanup(self):
         """
-        Clean up resources
+        Bersihkan sumber daya
         """
         if self.landmarker:
             self.landmarker.close()
-        print("🧹 MediaPipe Hand Landmarker cleaned up")
+        print("🧹 MediaPipe Hand Landmarker dibersihkan")
 
 def main():
     """
-    Main application function
+    Fungsi aplikasi utama
     """
     detector = MediaPipeHandDetector()
     
-    # Setup MediaPipe landmarker
+    # Siapkan MediaPipe landmarker
     if not detector.setup_landmarker():
-        print("❌ Failed to initialize MediaPipe Hand Landmarker")
+        print("❌ Gagal menginisialisasi MediaPipe Hand Landmarker")
         return
     
-    # Try different camera indices
+    # Coba indeks kamera yang berbeda
     camera_index = 0
     max_attempts = 2
     cap = None
     
     while camera_index < max_attempts:
-        cap = cv2.VideoCapture(camera_index, cv2.CAP_DSHOW)  # Use DirectShow backend
-        if cap.isOpened() and cap.read()[0]:  # Test if we can actually read frames
+        cap = cv2.VideoCapture(camera_index, cv2.CAP_DSHOW)  # Gunakan backend DirectShow
+        if cap.isOpened() and cap.read()[0]:  # Tes apakah kita bisa membaca frame
             break
-        print(f"Trying camera index {camera_index}...")
+        print(f"Mencoba indeks kamera {camera_index}...")
         camera_index += 1
         cap.release()
     
     if not cap or not cap.isOpened():
-        print("❌ Error: Could not open camera")
+        print("❌ Error: Tidak dapat membuka kamera")
         return
     
-    # Set camera properties for optimal performance
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)  # Lower resolution for faster processing
+    # Atur properti kamera untuk performa optimal
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)  # Resolusi lebih rendah untuk pemrosesan lebih cepat
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-    cap.set(cv2.CAP_PROP_FPS, 60)  # Higher FPS for smoother tracking
-    cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)  # Minimize frame buffer for lower latency
+    cap.set(cv2.CAP_PROP_FPS, 60)  # FPS lebih tinggi untuk pelacakan lebih halus
+    cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)  # Minimalkan buffer frame untuk latensi lebih rendah
     
-    print("🎥 Camera started. MediaPipe hand detection active...")
+    print("🎥 Kamera dimulai. Deteksi tangan MediaPipe aktif...")
     
     try:
         while True:
             ret, frame = cap.read()
             if not ret:
-                print("❌ Error: Could not read frame from camera")
+                print("❌ Error: Tidak dapat membaca frame dari kamera")
                 break
             
-            # Flip frame horizontally for mirror effect
+            # Balik frame secara horizontal untuk efek cermin
             frame = cv2.flip(frame, 1)
             
             if not detector.paused:
-                # Process frame with MediaPipe
+                # Proses frame dengan MediaPipe
                 frame = detector.process_frame(frame)
                 
-                # Calculate FPS
+                # Hitung FPS
                 detector.calculate_fps()
             
-            # Draw information overlay
+            # Gambar overlay informasi
             detector.draw_info(frame)
             
-            # Display frame
+            # Tampilkan frame
             cv2.imshow('MediaPipe Hand Landmark Detection', frame)
             
-            # Handle keyboard input
+            # Tangani input keyboard
             key = cv2.waitKey(1) & 0xFF
             
-            if key == ord('q') or key == 27:  # 'q' or ESC
+            if key == ord('q') or key == 27:  # 'q' atau ESC
                 break
             elif key == ord(' '):  # SPACE
                 detector.paused = not detector.paused
-                print(f"⏸️ {'Paused' if detector.paused else 'Resumed'}")
+                print(f"⏸️ {'Dijeda' if detector.paused else 'Dilanjutkan'}")
             elif key == ord('s'):  # 's'
                 detector.save_screenshot(frame)
             elif key == ord('c'):  # 'c'
                 detector.show_connections = not detector.show_connections
-                print(f"🔗 Connections: {'ON' if detector.show_connections else 'OFF'}")
+                print(f"🔗 Koneksi: {'AKTIF' if detector.show_connections else 'NONAKTIF'}")
             elif key == ord('l'):  # 'l'
                 detector.show_landmarks = not detector.show_landmarks
-                print(f"📍 Landmarks: {'ON' if detector.show_landmarks else 'OFF'}")
+                print(f"📍 Landmark: {'AKTIF' if detector.show_landmarks else 'NONAKTIF'}")
     
     except KeyboardInterrupt:
-        print("\n⚠️ Interrupted by user")
+        print("\n⚠️ Dihentikan oleh pengguna")
     
     finally:
-        # Cleanup
+        # Bersihkan
         cap.release()
         cv2.destroyAllWindows()
         detector.cleanup()
-        print("👋 MediaPipe Hand Detection stopped")
+        print("jalani aja dulu")
 
 if __name__ == "__main__":
     main()
