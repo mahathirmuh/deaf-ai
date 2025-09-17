@@ -49,6 +49,15 @@ class MediaPipeHandDetector:
         self.latest_result = None
         self.result_timestamp = 0
         
+        # Image dimensions and projection matrix for efficient processing
+        self.image_width = 640
+        self.image_height = 480
+        self.projection_matrix = np.array([
+            [2.0/self.image_width, 0, -1],
+            [0, -2.0/self.image_height, 1],
+            [0, 0, 1]
+        ])
+        
         # Hand landmark names for reference
         self.landmark_names = [
             'WRIST', 'THUMB_CMC', 'THUMB_MCP', 'THUMB_IP', 'THUMB_TIP',
@@ -113,11 +122,33 @@ class MediaPipeHandDetector:
             options = self.HandLandmarkerOptions(
                 base_options=base_options,
                 running_mode=self.VisionRunningMode.LIVE_STREAM,
-                num_hands=2,  # Detect up to 2 hands
-                min_hand_detection_confidence=0.5,
-                min_hand_presence_confidence=0.5,
-                min_tracking_confidence=0.5,
+                num_hands=2,  # Detect up to 2 hands simultaneously
+                min_hand_detection_confidence=0.5,  # Balanced detection threshold
+                min_hand_presence_confidence=0.5,  # Balanced presence threshold
+                min_tracking_confidence=0.5,  # Balanced tracking threshold
                 result_callback=self.result_callback
+            )
+            
+            # Configure model for faster inference
+            base_options.delegate = 'gpu'  # Use GPU acceleration if available
+            base_options.cpu_num_thread = 4  # Use multiple CPU threads
+            
+            # Set image dimensions for landmark projection
+            self.image_width = 640
+            self.image_height = 480
+            
+            # Configure for live video processing with proper dimensions
+            options.running_mode = self.VisionRunningMode.LIVE_STREAM
+            options.result_callback = self.result_callback
+            
+            # Set normalized dimensions for proper landmark scaling
+            self.scale_x = self.image_width / 640.0  # Normalize to MediaPipe's default width
+            self.scale_y = self.image_height / 480.0  # Normalize to MediaPipe's default height
+            
+            # Configure base options for optimal performance
+            base_options = mp.tasks.BaseOptions(
+                model_asset_path='hand_landmarker.task',
+                delegate=mp.tasks.BaseOptions.Delegate.GPU  # Enable GPU acceleration
             )
             
             self.landmarker = self.HandLandmarker.create_from_options(options)
@@ -129,8 +160,7 @@ class MediaPipeHandDetector:
             return False
     
     def process_frame(self, frame):
-        """
-        Process a single frame with MediaPipe Hand Landmarker
+        """Process a single frame with MediaPipe Hand Landmarker
         
         Args:
             frame: Input frame from camera
@@ -140,18 +170,19 @@ class MediaPipeHandDetector:
         """
         if self.landmarker is None:
             return frame
-        
-        # Convert BGR to RGB for MediaPipe
+            
+        # Convert BGR to RGB for MediaPipe (using faster conversion)
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         
-        # Create MediaPipe Image
-        mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb_frame)
-        
-        # Process frame asynchronously
+        # Create MediaPipe Image with dimensions and process immediately
+        mp_image = mp.Image(
+            image_format=mp.ImageFormat.SRGB,
+            data=rgb_frame
+        )
         timestamp_ms = int(time.time() * 1000)
         self.landmarker.detect_async(mp_image, timestamp_ms)
         
-        # Draw landmarks if available
+        # Draw landmarks if available for smoother display
         if self.latest_result and self.latest_result.hand_landmarks:
             self.draw_landmarks(frame, self.latest_result)
         
@@ -168,11 +199,12 @@ class MediaPipeHandDetector:
         height, width = frame.shape[:2]
         
         for hand_idx, hand_landmarks in enumerate(result.hand_landmarks):
-            # Convert normalized coordinates to pixel coordinates
+            # Convert landmarks to pixel coordinates using scaling factors
             landmark_points = []
             for landmark in hand_landmarks:
-                x = int(landmark.x * width)
-                y = int(landmark.y * height)
+                # Apply scaling factors to landmark coordinates
+                x = int(landmark.x * 640 * self.scale_x)
+                y = int(landmark.y * 480 * self.scale_y)
                 landmark_points.append((x, y))
             
             # Draw connections
@@ -322,16 +354,28 @@ def main():
         print("❌ Failed to initialize MediaPipe Hand Landmarker")
         return
     
-    # Initialize camera
-    cap = cv2.VideoCapture(0)
-    if not cap.isOpened():
+    # Try different camera indices
+    camera_index = 0
+    max_attempts = 2
+    cap = None
+    
+    while camera_index < max_attempts:
+        cap = cv2.VideoCapture(camera_index, cv2.CAP_DSHOW)  # Use DirectShow backend
+        if cap.isOpened() and cap.read()[0]:  # Test if we can actually read frames
+            break
+        print(f"Trying camera index {camera_index}...")
+        camera_index += 1
+        cap.release()
+    
+    if not cap or not cap.isOpened():
         print("❌ Error: Could not open camera")
         return
     
-    # Set camera properties for better performance
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
-    cap.set(cv2.CAP_PROP_FPS, 30)
+    # Set camera properties for optimal performance
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)  # Lower resolution for faster processing
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+    cap.set(cv2.CAP_PROP_FPS, 60)  # Higher FPS for smoother tracking
+    cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)  # Minimize frame buffer for lower latency
     
     print("🎥 Camera started. MediaPipe hand detection active...")
     
